@@ -35,7 +35,7 @@ const movieSchema = new mongoose.Schema({
     validate: (url) => URL_REGEX.test(url),
   },
   // ссылка на трейлер фильма
-  trailerLink: {
+  trailer: {
     type: String,
     required: true,
     validate: (url) => URL_REGEX.test(url),
@@ -46,7 +46,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
     validate: (url) => URL_REGEX.test(url),
   },
-  // _id пользователя, который сохранил фильм
+  // id пользователя, который сохранил фильм
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
