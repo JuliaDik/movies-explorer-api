@@ -1,3 +1,5 @@
+// переменные из файла .env добавляются в process.env
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -13,15 +15,13 @@ mongoose.connect(MONGODB_URL, {
   useNewUrlParser: true,
 });
 
-// собираем поток запросов в формате json в req.body
+// собираем в req.body поток запросов в формате JSON
 app.use(bodyParser.json());
-
-// собираем поток запросов в формате URL-кодированных данных в req.body
-app.use(bodyParser.urlencoded({ extended: true }));
 
 // подключаем маршруты запросов
 app.use(router);
 
+// взаимодействуем с клиентом через порт 3000
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { URL_REGEX } = require('../utils/constants');
 
-// схема фильма
+// схема-шаблон для записи данных фильма в БД
 const movieSchema = new mongoose.Schema({
   // страна создания фильма
   country: {

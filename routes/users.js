@@ -1,11 +1,11 @@
 const router = require('express').Router();
 
-const { getUserInfo, updateUserInfo } = require('../controllers/users');
+const { getUserData, updateUserData } = require('../controllers/users');
 
 // получить данные пользователя (email и name)
-router.get('/me', getUserInfo);
+router.get('/me', getUserData);
 
 // обновить данные пользователя (email и name)
-router.patch('/me', updateUserInfo);
+router.patch('/me', updateUserData);
 
 module.exports = router;

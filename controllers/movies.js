@@ -1,20 +1,22 @@
 const Movie = require('../models/movie');
 
-// получить сохраненные пользователем фильмы
+// ПОЛУЧИТЬ СОХРАНЕННЫЕ ФИЛЬМЫ
+
 const getSavedMovies = (req, res) => {
   // сохраним id пользователя из объекта запроса
   const userId = req.user._id;
   // ОБРАЩЕНИЕ К БД: найти все сохраненные фильмы (ссылаемся на id пользователя-владельца)
   Movie.find({ owner: userId })
-    // ОТВЕТ ОТ БД: объекты сохраненных фильмов
+    // ОТВЕТ ОТ БД: массив JSON-ов сохраненных фильмов
     .then((movies) => res.send(movies));
 };
 
-// создать фильм
+// СОЗДАТЬ ФИЛЬМ
+
 const createMovie = (req, res) => {
   // сохраним id пользователя из объекта запроса
   const owner = req.user._id;
-  // сохраняем из тела запроса следующие данные о фильме
+  // сохраняем из тела запроса следующие данные фильма
   const {
     country,
     director,
@@ -28,7 +30,7 @@ const createMovie = (req, res) => {
     nameRU,
     nameEN,
   } = req.body;
-  // ОБРАЩЕНИЕ К БД: сохранить новый фильм в БД (указываем id пользователя, сохраняющего фильм)
+  // ОБРАЩЕНИЕ К БД: сохранить новый фильм в БД (+указываем id пользователя, сохраняющего фильм)
   Movie.create({
     owner,
     country,
@@ -43,11 +45,12 @@ const createMovie = (req, res) => {
     nameRU,
     nameEN,
   })
-    // ОТВЕТ ОТ БД: объект фильма
+    // ОТВЕТ ОТ БД: JSON фильма (с присвоенным ему _id + указанием id пользователя в owner)
     .then((movie) => res.send(movie));
 };
 
-// удалить фильм
+// УДАЛИТЬ ФИЛЬМ
+
 const deleteMovie = (req, res) => {
   // сохраним id фильма из параметров запроса (содержится в url запроса)
   const { _id } = req.params;
@@ -55,6 +58,7 @@ const deleteMovie = (req, res) => {
   Movie.findById(_id)
     // найденный фильм удалить
     .then((movie) => movie.deleteOne())
+    // ОТВЕТ ОТ БД
     .then(() => res.send({ message: 'Фильм удален' }));
 };
 

@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 const { getSavedMovies, createMovie, deleteMovie } = require('../controllers/movies');
 
-// получить сохраненные фильмы
+// получить фильмы (сохраненные)
 router.get('/', getSavedMovies);
 
 // создать фильм
