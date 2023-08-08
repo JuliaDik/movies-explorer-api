@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const UnauthorizedError = require('../errors/unauthorized-err');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -6,10 +7,15 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 const auth = (req, res, next) => {
   // сохраняем заголовок authorization из заголовков запроса
-  const { authorization } = req.headers;
   // в заголовке authorization записана схема аутентификации Bearer,
   // в которой прописан токен, выданный пользователю при авторизации (login)
-  // извлекаем из этой схемы токен
+  const { authorization } = req.headers;
+
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    return next(new UnauthorizedError('Необходима авторизация'));
+  }
+
+  // извлекаем из схемы аутентификации токен
   const token = authorization.replace('Bearer ', '');
   let payload;
   try {
@@ -17,9 +23,11 @@ const auth = (req, res, next) => {
     // сраниваем идентификатор пользователя, секретный ключ подписи, срок действия токена
     payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
   } catch (err) {
-    console.error(err);
+    return next(new UnauthorizedError('Необходима авторизация'));
   }
-  // добавляем в объект запроса payload токена
+  // присваиваем пользовательскому ключу payload токена
+  // payload токена имеет подобный формат:
+  // { _id: '64d2a91ad88ee6013fb22848', iat: 1691528237, exp: 1692133037 }
   req.user = payload;
   return next();
 };
