@@ -16,7 +16,7 @@ const getSavedMovies = (req, res, next) => {
     .catch(next);
 };
 
-// СОЗДАТЬ ФИЛЬМ
+// ДОБАВИТЬ ФИЛЬМ В СОХРАНЕННЫЕ
 
 const createMovie = (req, res, next) => {
   // получаем из пользовательского ключа id пользователя
@@ -61,7 +61,7 @@ const createMovie = (req, res, next) => {
     });
 };
 
-// УДАЛИТЬ ФИЛЬМ
+// УДАЛИТЬ ФИЛЬМ ИЗ СОХРАНЕННЫХ
 
 const deleteMovie = (req, res, next) => {
   // получаем из параметров запроса id фильма (содержится в url запроса)

@@ -5,6 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const router = require('./routes/index');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const errorHandler = require('./middlewares/error-handler');
@@ -30,6 +31,11 @@ app.use(router);
 
 // записываем все возникающие ошибки в отдельный файл ("журнал ошибок")
 app.use(errorLogger);
+
+// подключаем обработчик ошибок (celebrate),
+// возникших при валидации данных запроса (до запуска контроллера)
+// все остальные ошибки передаются в централизованный обработчик ошибок
+app.use(errors());
 
 // обрабатываем ошибки централизованно
 // выставляем сообщение об ошибке в зависимости от ее статутса
