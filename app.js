@@ -4,12 +4,13 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('./middlewares/cors');
+const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
-const router = require('./routes/index');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
 const errorHandler = require('./middlewares/error-handler');
-const cors = require('./middlewares/cors');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+const router = require('./routes/index');
 
 const { PORT = 3000, MONGODB_URL = 'mongodb://127.0.0.1:27017/bitfilmsdb' } = process.env;
 
@@ -23,6 +24,14 @@ mongoose.connect(MONGODB_URL, {
 
 // настраиваем кросс-доменные запросы
 app.use(cors);
+
+// ограничиваем количество запросов на сервер
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+}));
 
 // собираем в req.body поток запросов в формате JSON
 app.use(bodyParser.json());
