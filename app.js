@@ -9,6 +9,7 @@ const { errors } = require('celebrate');
 const router = require('./routes/index');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const errorHandler = require('./middlewares/error-handler');
+const cors = require('./middlewares/cors');
 
 const { PORT = 3000, MONGODB_URL = 'mongodb://127.0.0.1:27017/bitfilmsdb' } = process.env;
 
@@ -19,6 +20,9 @@ const app = express();
 mongoose.connect(MONGODB_URL, {
   useNewUrlParser: true,
 });
+
+// настраиваем кросс-доменные запросы
+app.use(cors);
 
 // собираем в req.body поток запросов в формате JSON
 app.use(bodyParser.json());
