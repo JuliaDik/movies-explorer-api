@@ -1,5 +1,6 @@
 // домены, с которых разрешены кросс-доменные запросы
 const allowedCors = [
+  'https://movies.dikolenko.nomoreparties.co',
   'http://localhost:3000',
 ];
 
