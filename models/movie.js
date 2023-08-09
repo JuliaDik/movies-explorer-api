@@ -69,7 +69,7 @@ const movieSchema = new mongoose.Schema({
   },
 });
 
-// модель фильма
+// модель фильма (используется в обращениии к БД в контроллерах)
 const Movie = mongoose.model('movie', movieSchema);
 
 module.exports = Movie;

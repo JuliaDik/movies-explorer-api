@@ -5,8 +5,8 @@ const User = require('../models/user');
 const ConflictError = require('../errors/conflict-err');
 const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
-
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { ConflictErrorMessage, BadRequestErrorMessage, NotFoundErrorMessage } = require('../utils/constants');
+const { SECRET_KEY } = require('../utils/config');
 
 // РЕГИСТРАЦИЯ: создать пользователя
 
@@ -25,14 +25,15 @@ const createUser = (req, res, next) => {
     .then((user) => res.status(201).send({
       name: user.name,
       email: user.email,
+      // _id автоматически присваивается новой записи в БД
       _id: user._id,
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        return next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
+        return next(new ConflictError(ConflictErrorMessage.userEmail));
       }
       if (err instanceof mongoose.Error.ValidationError) {
-        return next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+        return next(new BadRequestError(BadRequestErrorMessage.userData));
       }
       return next(err);
     });
@@ -49,12 +50,14 @@ const login = (req, res, next) => {
     .then((user) => {
       // генерируем токен для пользователя
       const token = jwt.sign(
-        // идентификатор пользователя,
-        // по которому осуществляется верификация токена (jwt.verify в auth)
+        // тот _id, который был присвоен при создании нового пользователя,
+        // записываем в свойство _id (токен получает уникальное значение)
+        // по _id пользователя будет осуществляться верификация токена (jwt.verify)
+        // на этапе предоставления доступа к защищенным маршрутам
         { _id: user._id },
         // секретный ключ подписи
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
-        // токен действителен в течение 7 дней
+        SECRET_KEY,
+        // период действия токена: 7 дней
         // затем пользователю нужно будет вновь авторизоваться, т.е. получить новый токен
         { expiresIn: '7d' },
       );
@@ -67,7 +70,8 @@ const login = (req, res, next) => {
 // ПОЛУЧИТЬ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (name и email)
 
 const getUserData = (req, res, next) => {
-  // получаем из пользовательского ключа id пользователя
+  // получаем id пользователя из пользовательского ключа
+  // --> из payload токена, присвоенного перед предоставлением доступа к защищенным маршрутам
   const userId = req.user._id;
   // ОБРАЩЕНИЕ К БД: найти пользователя по id
   User.findById(userId)
@@ -78,7 +82,7 @@ const getUserData = (req, res, next) => {
     }))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        return next(new BadRequestError('Передан некорректный _id пользователя'));
+        return next(new BadRequestError(BadRequestErrorMessage.userId));
       }
       return next(err);
     });
@@ -89,13 +93,14 @@ const getUserData = (req, res, next) => {
 const updateUserData = (req, res, next) => {
   // получаем из тела запроса name и email
   const { name, email } = req.body;
-  // получаем из пользовательского ключа id пользователя
+  // получаем id пользователя из пользовательского ключа
+  // --> из payload токена, присвоенного перед предоставлением доступа к защищенным маршрутам
   const userId = req.user._id;
   // ОБРАЩЕНИЕ К БД: найти пользователя по id и обновить его данные (name и email)
   User.findByIdAndUpdate(userId, { name, email }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь с указанным _id не найден');
+        throw new NotFoundError(NotFoundErrorMessage.userId);
       }
       // ОТВЕТ ОТ БД: JSON пользователя с обновленными данными (name и email)
       return res.send({
@@ -105,7 +110,7 @@ const updateUserData = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
+        return next(new BadRequestError(BadRequestErrorMessage.userUpdate));
       }
       return next(err);
     });

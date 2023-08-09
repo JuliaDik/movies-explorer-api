@@ -3,11 +3,13 @@ const Movie = require('../models/movie');
 const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
 const ForbiddenError = require('../errors/forbidden-err');
+const { BadRequestErrorMessage, NotFoundErrorMessage, ForbiddenErrorMessage } = require('../utils/constants');
 
 // ПОЛУЧИТЬ СОХРАНЕННЫЕ ФИЛЬМЫ
 
 const getSavedMovies = (req, res, next) => {
-  // получаем из пользовательского ключа id пользователя
+  // получаем id пользователя из пользовательского ключа
+  // --> из payload токена, присвоенного перед предоставлением доступа к защищенным маршрутам
   const userId = req.user._id;
   // ОБРАЩЕНИЕ К БД: найти все сохраненные фильмы по id пользователя
   Movie.find({ owner: userId })
@@ -19,7 +21,8 @@ const getSavedMovies = (req, res, next) => {
 // ДОБАВИТЬ ФИЛЬМ В СОХРАНЕННЫЕ
 
 const createMovie = (req, res, next) => {
-  // получаем из пользовательского ключа id пользователя
+  // получаем id пользователя из пользовательского ключа
+  // --> из payload токена, присвоенного перед предоставлением доступа к защищенным маршрутам
   const userId = req.user._id;
   // получаем из тела запроса следующие данные фильма
   const {
@@ -55,7 +58,7 @@ const createMovie = (req, res, next) => {
     .then((movie) => res.status(201).send(movie))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        return next(new BadRequestError('Переданы некорректные данные при создании фильма'));
+        return next(new BadRequestError(BadRequestErrorMessage.movieData));
       }
       return next(err);
     });
@@ -64,16 +67,19 @@ const createMovie = (req, res, next) => {
 // УДАЛИТЬ ФИЛЬМ ИЗ СОХРАНЕННЫХ
 
 const deleteMovie = (req, res, next) => {
+  // получаем id пользователя из пользовательского ключа
+  // --> из payload токена, присвоенного перед предоставлением доступа к защищенным маршрутам
+  const userId = req.user._id;
   // получаем из параметров запроса id фильма (содержится в url запроса)
-  const { _id } = req.params;
+  const { movieId } = req.params;
   // ОБРАЩЕНИЕ К БД: найти фильм по id
-  Movie.findById(_id)
+  Movie.findById(movieId)
     .then((movie) => {
       if (!movie) {
-        throw new NotFoundError('Фильм с указанным _id не найден');
+        throw new NotFoundError(NotFoundErrorMessage.movieId);
       }
-      if (movie.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('Нельзя удалить фильм другого пользователя');
+      if (movie.owner.toString() !== userId) {
+        throw new ForbiddenError(ForbiddenErrorMessage.movieOwner);
       }
       // найденный фильм удалить
       return movie.deleteOne();
@@ -82,7 +88,7 @@ const deleteMovie = (req, res, next) => {
     .then(() => res.send({ message: 'Фильм удален' }))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        return next(new BadRequestError('Передан некорректный _id фильма'));
+        return next(new BadRequestError(BadRequestErrorMessage.movieId));
       }
       return next(err);
     });

@@ -1,12 +1,19 @@
-const errorHandler = ((err, req, res, next) => {
-  // по умолчанию: статус ошибки 500 (внутренняя ошибка сервера: запрос не удалось выполнить)
-  const { statusCode = 500, message } = err;
+const { statusCodes, ServerErrorMessage } = require('../utils/constants');
+
+const errorHandler = (err, req, res, next) => {
+  // по умолчанию: статус ошибки 500 "Внутренняя ошибка сервера" (запрос не удалось выполнить)
+  const { statusCode = statusCodes.serverError, message } = err;
 
   res
     .status(statusCode)
-    // статус ошибки - соответствующее сообщение
-    .send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
+    // статус ошибки --> появляется соответствующее сообщение об ошибке
+    .send({
+      message:
+        statusCode === statusCodes.serverError
+          ? ServerErrorMessage.server
+          : message,
+    });
   next();
-});
+};
 
 module.exports = errorHandler;

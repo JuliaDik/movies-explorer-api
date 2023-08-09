@@ -1,8 +1,10 @@
+const { statusCodes } = require('../utils/constants');
+
 // некорректный запрос от клиента к серверу
 class BadRequestError extends Error {
   constructor(message) {
     super(message);
-    this.statusCode = 400;
+    this.statusCode = statusCodes.badRequestError;
   }
 }
 

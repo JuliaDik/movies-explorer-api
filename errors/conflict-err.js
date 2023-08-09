@@ -1,8 +1,10 @@
+const { statusCodes } = require('../utils/constants');
+
 // некорректный запрос от клиента к серверу
 class ConflictError extends Error {
   constructor(message) {
     super(message);
-    this.statusCode = 409;
+    this.statusCode = statusCodes.conflictError;
   }
 }
 

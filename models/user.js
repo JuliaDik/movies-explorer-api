@@ -2,6 +2,7 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const UnauthorizedError = require('../errors/unauthorized-err');
+const { UnauthorizedErrorMessage } = require('../utils/constants');
 
 // схема-шаблон для записи данных пользователя в БД
 const userSchema = new mongoose.Schema({
@@ -28,7 +29,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// добавим метод findUserByCredentials схеме пользователя
+// добавим метод findUserByCredentials схеме пользователя (для контроллера login)
 userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
   // находим в БД пользователя по почте, т.к. почта - уникальное поле
   // this = User
@@ -36,7 +37,7 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
     .then((user) => {
       // не нашелся пользователь — ошибка
       if (!user) {
-        throw new UnauthorizedError('Неправильные почта или пароль');
+        throw new UnauthorizedError(UnauthorizedErrorMessage.userCredentials);
       }
       // нашелся пользователm — сравниваем хеши двух паролей:
       // переданного при авторизации и найденного в БД
@@ -44,7 +45,7 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
         .then((matched) => {
           // не совпали хеши паролей - ошибка
           if (!matched) {
-            throw new UnauthorizedError('Неправильные почта или пароль');
+            throw new UnauthorizedError(UnauthorizedErrorMessage.userCredentials);
           }
           // совпали хеши паролей - вернуть JSON пользователя из БД
           return user;
@@ -52,7 +53,7 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
     });
 };
 
-// модель пользователя
+// модель пользователя (используется в обращениии к БД в контроллерах)
 const User = mongoose.model('user', userSchema);
 
 module.exports = User;
