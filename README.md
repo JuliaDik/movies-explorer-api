@@ -20,4 +20,4 @@ API для регистрации и авторизации пользовате
 
 Backend https://api.movies.dikolenko.nomoreparties.co
 
-IP 158.160.22.54
+IP 158.160.77.150
