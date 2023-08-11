@@ -109,6 +109,9 @@ const updateUserData = (req, res, next) => {
       });
     })
     .catch((err) => {
+      if (err.code === 11000) {
+        return next(new ConflictError(ConflictErrorMessage.userEmail));
+      }
       if (err instanceof mongoose.Error.ValidationError) {
         return next(new BadRequestError(BadRequestErrorMessage.userUpdate));
       }

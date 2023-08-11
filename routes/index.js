@@ -22,7 +22,7 @@ router.use('/users', auth, usersRouter);
 router.use('/movies', auth, moviesRouter);
 
 // несуществующий маршрут
-router.use((req, res, next) => {
+router.all('*', auth, (req, res, next) => {
   next(new NotFoundError(NotFoundErrorMessage.noRoute));
 });
 
